@@ -7,11 +7,16 @@ interface GameEndProps {
   onNewPlayers: () => void;
   onRestartWithNewCategories: (categories: Category[]) => void;
   currentCategories: Category[];
+  playerNames: string[];
 }
 
-function GameEnd({ onRestart, onNewPlayers, onRestartWithNewCategories, currentCategories }: GameEndProps) {
+function GameEnd({ onRestart, onNewPlayers, onRestartWithNewCategories, currentCategories, playerNames }: GameEndProps) {
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<Category[]>(currentCategories);
+  
+  // Elegir un jugador aleatorio para empezar
+  const randomStarterIndex = Math.floor(Math.random() * playerNames.length);
+  const startingPlayer = playerNames[randomStarterIndex];
 
   const toggleCategory = (category: Category) => {
     if (selectedCategories.includes(category)) {
@@ -159,24 +164,39 @@ function GameEnd({ onRestart, onNewPlayers, onRestartWithNewCategories, currentC
           </p>
         </div>
 
+        {/* Información del jugador que empieza */}
+        <div className="bg-gradient-to-r from-purple-600/20 to-purple-700/20 rounded-xl p-4 border border-purple-500/30">
+          <p className="text-white font-semibold text-sm mb-2">🎮 ¿Quién empieza?</p>
+          <p className="text-2xl font-bold text-purple-300 bg-black/30 py-2 px-4 rounded-lg">
+            {startingPlayer}
+          </p>
+          <p className="text-gray-400 text-xs mt-2">
+            ¡Elige al azar! {startingPlayer} dará la primera pista
+          </p>
+        </div>
+
         {/* Instrucciones del juego */}
         <div className="bg-gray-700/50 rounded-xl p-4 space-y-3 border border-gray-600">
           <p className="text-white font-semibold text-base">¿Cómo jugar?</p>
           <ul className="text-left text-gray-300 space-y-2 text-sm">
             <li className="flex items-start gap-2">
               <span className="text-purple-400 font-bold">1.</span>
-              <span>Cada jugador da una pista sobre la palabra</span>
+              <span><strong>{startingPlayer}</strong> da la primera pista sobre la palabra</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-purple-400 font-bold">2.</span>
-              <span>El impostor debe disimular e intentar adivinar</span>
+              <span>Siguen los demás en orden</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-purple-400 font-bold">3.</span>
-              <span>Al final, voten quién es el impostor</span>
+              <span>El impostor debe disimular e intentar adivinar</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-purple-400 font-bold">4.</span>
+              <span>Al final, voten quién es el impostor</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-purple-400 font-bold">5.</span>
               <span>Revelen quién era el impostor y si acertaron</span>
             </li>
           </ul>
