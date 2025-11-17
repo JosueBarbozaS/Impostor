@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Users, Sparkles, Ghost, HelpCircle, CheckSquare, Square } from 'lucide-react';
+import { Users, Sparkles, Ghost, HelpCircle, CheckSquare, Square, UserX } from 'lucide-react';
 import { Category } from '../App';
 
 interface GameSetupProps {
-  onStart: (playerCount: number, selectedCategories: Category[], gameMode: 'basic' | 'withClues') => void;
+  onStart: (playerCount: number, impostorCount: number, selectedCategories: Category[], gameMode: 'basic' | 'withClues') => void;
 }
 
 function GameSetup({ onStart }: GameSetupProps) {
   const [playerCount, setPlayerCount] = useState(3);
+  const [impostorCount, setImpostorCount] = useState(1);
   const [selectedCategories, setSelectedCategories] = useState<Category[]>(['lugares', 'comida', 'objetos', 'animales', 'cantantes', 'deportes']);
   const [gameMode, setGameMode] = useState<'basic' | 'withClues'>('basic');
 
@@ -16,7 +17,7 @@ function GameSetup({ onStart }: GameSetupProps) {
       alert('¡Selecciona al menos una categoría!');
       return;
     }
-    onStart(playerCount, selectedCategories, gameMode);
+    onStart(playerCount, impostorCount, selectedCategories, gameMode);
   };
 
   const toggleCategory = (category: Category) => {
@@ -33,6 +34,61 @@ function GameSetup({ onStart }: GameSetupProps) {
 
   const clearAllCategories = () => {
     setSelectedCategories([]);
+  };
+
+  const handlePlayerCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value)) {
+      const newCount = Math.min(10, Math.max(3, value));
+      setPlayerCount(newCount);
+      // Ajustar impostores si excede el nuevo máximo
+      if (impostorCount > Math.floor(newCount / 2)) {
+        setImpostorCount(Math.max(1, Math.floor(newCount / 2)));
+      }
+    }
+  };
+
+  const handleImpostorCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value)) {
+      const maxImpostors = Math.floor(playerCount / 2);
+      setImpostorCount(Math.min(maxImpostors, Math.max(1, value)));
+    }
+  };
+
+  const incrementPlayers = () => {
+    if (playerCount < 10) {
+      const newCount = playerCount + 1;
+      setPlayerCount(newCount);
+      // Ajustar impostores si es necesario
+      if (impostorCount > Math.floor(newCount / 2)) {
+        setImpostorCount(Math.max(1, Math.floor(newCount / 2)));
+      }
+    }
+  };
+
+  const decrementPlayers = () => {
+    if (playerCount > 3) {
+      const newCount = playerCount - 1;
+      setPlayerCount(newCount);
+      // Ajustar impostores si es necesario
+      if (impostorCount > Math.floor(newCount / 2)) {
+        setImpostorCount(Math.max(1, Math.floor(newCount / 2)));
+      }
+    }
+  };
+
+  const incrementImpostors = () => {
+    const maxImpostors = Math.floor(playerCount / 2);
+    if (impostorCount < maxImpostors) {
+      setImpostorCount(impostorCount + 1);
+    }
+  };
+
+  const decrementImpostors = () => {
+    if (impostorCount > 1) {
+      setImpostorCount(impostorCount - 1);
+    }
   };
 
   const allCategories: Category[] = ['lugares', 'comida', 'objetos', 'animales', 'cantantes', 'deportes'];
@@ -65,16 +121,34 @@ function GameSetup({ onStart }: GameSetupProps) {
               <Users className="w-4 h-4" />
               Número de jugadores
             </label>
-            <input
-              type="number"
-              min="3"
-              max="10"
-              value={playerCount}
-              onChange={(e) => setPlayerCount(Math.min(10, Math.max(3, parseInt(e.target.value) || 3)))}
-              className="w-full px-3 py-2 bg-gray-700 border-2 border-gray-600 rounded-lg focus:outline-none focus:border-purple-500 font-semibold text-white text-center placeholder-gray-400"
-            />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={decrementPlayers}
+                disabled={playerCount <= 3}
+                className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-600 transition-colors border border-gray-600"
+              >
+                -
+              </button>
+              <input
+                type="number"
+                min="3"
+                max="10"
+                value={playerCount}
+                onChange={handlePlayerCountChange}
+                className="flex-1 px-3 py-2 bg-gray-700 border-2 border-gray-600 rounded-lg focus:outline-none focus:border-purple-500 font-semibold text-white text-center placeholder-gray-400"
+              />
+              <button
+                onClick={incrementPlayers}
+                disabled={playerCount >= 10}
+                className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-600 transition-colors border border-gray-600"
+              >
+                +
+              </button>
+            </div>
             <p className="text-xs text-gray-400 text-center">Mínimo 3, máximo 10</p>
           </div>
+
+          
 
           {/* Selector de modo de juego */}
           <div className="space-y-2">
